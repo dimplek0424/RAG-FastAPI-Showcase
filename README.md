@@ -82,6 +82,7 @@ rag-chat-assistant/
 - [How We Improved RAG Responses](docs/RAG_Improvements.md)
 - [Frontend UX Decisions & Design Notes](docs/UX_Design_Notes.md)
 - [Deployment Guide](docs/Deployment.md)
+- [How to get OpenAI key](docs/How to get an OpenAI API key.pdf)
 
 ---
 
