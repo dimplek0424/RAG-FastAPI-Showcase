@@ -14,6 +14,11 @@ from rag_engine import get_vectorstore_from_chunks, create_rag_chain
 # Initialize the FastAPI app
 app = FastAPI()
 
+# ✅ Health check endpoint (used by Render or other platforms)
+@app.get("/healthz")
+def health_check():
+    return {"status": "ok"}
+
 # CORS middleware to allow frontend apps (e.g. React) to access the backend APIs
 app.add_middleware(
     CORSMiddleware,
