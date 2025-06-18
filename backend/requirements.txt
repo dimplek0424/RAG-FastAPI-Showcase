@@ -1,0 +1,22 @@
+# Core Backend Framework
+fastapi==0.111.0
+uvicorn==0.29.0
+
+# LangChain & LLMs
+langchain==0.1.13
+langchain-community==0.0.29
+openai==1.59.7
+tiktoken==0.7.0
+
+# PDF Support
+pypdf==4.3.1
+
+# Vector Store
+chromadb==0.4.24
+
+# Env and File Handling
+python-dotenv==1.0.1
+python-multipart==0.0.9
+
+# For safety and logging (optional but helpful)
+httpx==0.27.0
