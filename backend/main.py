@@ -118,6 +118,7 @@ async def upload_pdf(file: UploadFile):
 # Route: Ask a question against uploaded PDF
 @app.post("/ask/")
 async def ask_question(data: QuestionInput):
+    print("Received question:", data.question)
     """
     Endpoint to ask a natural language question.
     Returns an answer based on the uploaded PDF (RAG-based),
