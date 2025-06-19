@@ -16,6 +16,7 @@ function App() {
   const [question, setQuestion] = useState(""); // Current input question
   const [chatLog, setChatLog] = useState([]); // Current chat log for this file
   const [chatCache, setChatCache] = useState({}); // Stores all chats per fileHash
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
   // === FILE SELECTION ===
   const handleFileChange = async (e) => {
@@ -43,7 +44,7 @@ function App() {
 
     try {
       setIsUploading(true);
-      await axios.post("http://127.0.0.1:8000/upload/", formData, {
+      await axios.post("${BACKEND_URL}/upload/", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       setUploadSuccess(true);
@@ -62,7 +63,7 @@ function App() {
 
     try {
       const response = await axios.post(
-        "http://127.0.0.1:8000/ask/",
+        "${BACKEND_URL}/ask/",
         new URLSearchParams({ question }),
         { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
       );
