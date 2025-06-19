@@ -44,8 +44,8 @@ function App() {
 
     try {
       setIsUploading(true);
-      await axios.post('${BACKEND_URL}/upload/', formData, {
-        headers: { "Content-Type": "multipart/form-data" },
+      await axios.post(`${BACKEND_URL}/upload/`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
       });
       setUploadSuccess(true);
       setChatLog([]);
@@ -63,9 +63,9 @@ function App() {
 
     try {
       const response = await axios.post(
-        '${BACKEND_URL}/ask/',
-        new URLSearchParams({ question }),
-        { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
+        `${BACKEND_URL}/ask/`,
+         new URLSearchParams({ question }),
+         { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
       );
 
       const answer = response.data.answer.replace(/\n/g, "<br/>");
