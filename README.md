@@ -1,110 +1,208 @@
-# RAG Chat Assistant (Local Setup Guide)
+# 📚 RAG_FASTAPI – Retrieval-Augmented Generation Chat Assistant
 
-A full-stack Retrieval-Augmented Generation (RAG) assistant built using FastAPI (backend) and React (frontend).
+A lightweight Retrieval-Augmented Generation (RAG) web application using **FastAPI**, **LangChain**, **ChromaDB**, and **OpenAI GPT-4** for intelligent question-answering on uploaded PDF documents.
 
----
+## 🧱 Tech Stack
 
-## 🔧 Setup Instructions
-
-### 1. Clone This Repository
-
-```bash
-git clone https://github.com/your-username/rag-chat-assistant.git
-cd rag-chat-assistant
-```
-
-### 2. Setup Python Backend
-
-```bash
-cd backend
-python -m venv venv
-source venv/Scripts/activate  # On Windows
-# or
-source venv/bin/activate  # On macOS/Linux
-
-pip install -r requirements.txt
-```
-
-### 3. Set OpenAI API Key
-
-Create a `.env` file inside `/backend`:
-
-```ini
-OPENAI_API_KEY=your_openai_key_here
-```
-
-### 4. Run Backend
-
-```bash
-uvicorn main:app --reload
-```
-
-Navigate to: [http://127.0.0.1:8000](http://127.0.0.1:8000)
+- **Backend**: FastAPI · LangChain · OpenAI · ChromaDB
+- **Frontend**: Vite + React
+- **Vector Store**: Chroma
+- **Deployment**:
+  - Backend: Render (Docker)
+  - Frontend: Vercel (Vite React)
+- **Language Support**: Python 3.10
 
 ---
 
-### 5. Setup Frontend
+## 🚀 Features
 
-```bash
-cd ../frontend
-npm install
-npm run dev
-```
-
-Navigate to: [http://localhost:5173](http://localhost:5173)
+- Upload PDF documents
+- Extract and embed content using OpenAI Embeddings
+- Store and retrieve vectors using ChromaDB
+- Ask questions in a chat UI and get grounded responses via GPT
+- Session-based chat persistence
+- Live deployed frontend + backend integration
 
 ---
 
-## 📁 Project Structure
+## 📂 Project Structure
 
-```txt
-rag-chat-assistant/
+```
+RAG_FASTAPI/
 ├── backend/
 │   ├── main.py
-│   ├── utils.py
-│   ├── rag_engine.py
-│   └── requirements.txt
+│   ├── utils/
+│   ├── temp_files/
+│   ├── chroma/
+│   ├── Dockerfile
+│   ├── requirements.txt
+│   └── runtime.txt
 ├── frontend/
-│   ├── App.jsx
-│   ├── App.css
-│   └── index.html
-├── docs/
-│   ├── RAG_Improvements.md
-│   ├── UX_Design_Notes.md
-│   └── Deployment.md
+│   ├── public/
+│   ├── src/
+│   ├── vite.config.js
+│   └── ...
+├── .gitignore
 └── README.md
 ```
 
 ---
 
-## 📘 Documentation
+## ⚙️ Backend Setup (Render + Docker)
 
-- [🧠 How We Improved RAG Responses](docs/RAG_Improvements.md)
-- [🎨 Frontend UX Decisions & Design Notes](docs/UX_Design_Notes.md)
-- [🚀 Deployment Guide](docs/Deployment.md)
-- [📄 How to Get Your OpenAI API Key](docs/How%20to%20get%20an%20OpenAI%20API%20key.pdf)
+### 🔧 Local Development
 
----
+1. **Install dependencies:**
 
-## 🧪 Sample Prompt
+```bash
+cd backend
+pip install -r requirements.txt
+```
 
-> “List all strategies mentioned in the uploaded document.”
+2. **Run the app:**
 
-The assistant will extract facts directly from the file and cite relevant chunks.
-
----
-
-## 🙌 Acknowledgements
-
-Built with ❤️ using:
-- [LangChain](https://www.langchain.com/)
-- [OpenAI GPT-4o](https://platform.openai.com/)
-- [Chroma](https://www.trychroma.com/)
-- [React](https://reactjs.org/)
-- [FastAPI](https://fastapi.tiangolo.com/)
+```bash
+uvicorn main:app --reload
+```
 
 ---
 
-## 🔐 Disclaimer
+### 🚢 Deployment on Render (Docker)
 
-You are responsible for securing and managing your OpenAI API key usage and credits.
+1. **Dockerfile**
+
+```dockerfile
+FROM python:3.10-slim
+WORKDIR /app
+COPY ./backend /app
+RUN apt-get update && apt-get install -y build-essential cargo && \
+    pip install --upgrade pip && \
+    pip install -r requirements.txt
+EXPOSE 10000
+CMD ["uvicorn", "main:app", "--host=0.0.0.0", "--port=10000"]
+```
+
+2. **runtime.txt** (in `backend/`):
+
+```
+python-3.10.13
+```
+
+3. **Render Settings**:
+   - Name: `rag-fastapi-backend`
+   - Branch: `main`
+   - Root Directory: *(leave blank for Docker)*
+   - Docker Build Context: `.`  
+   - Dockerfile Path: `./Dockerfile`
+   - Instance: Free or Starter
+   - Environment Variable:
+     ```
+     OPENAI_API_KEY=your-key-here
+     ```
+
+4. **Render URL (example)**:
+```
+https://rag-fastapi-backend.onrender.com
+```
+
+---
+
+## 🌐 Frontend Setup (Vercel)
+
+### 🛠 Local Development
+
+1. Install dependencies:
+
+```bash
+cd frontend
+npm install
+```
+
+2. Run the frontend:
+
+```bash
+npm run dev
+```
+
+Make sure `.env` contains:
+```
+VITE_BACKEND_URL=http://localhost:8000
+```
+
+---
+
+### 🚀 Deploy on Vercel
+
+1. Push your repo to GitHub.
+2. Go to [vercel.com](https://vercel.com) → New Project → Import your repo.
+3. Set Environment Variable:
+
+```
+VITE_BACKEND_URL=https://rag-fastapi-backend.onrender.com
+```
+
+4. Click **Deploy**. Done!
+
+---
+
+## 🔄 Connecting Frontend to Backend
+
+In your React code:
+
+```js
+const BASE_URL = import.meta.env.VITE_BACKEND_URL;
+
+const response = await fetch(`${BASE_URL}/ask`, {
+  method: "POST",
+  body: JSON.stringify({ question: "..." }),
+});
+```
+
+---
+
+## 🧪 Example API Call
+
+**POST** `/ask`
+
+```json
+{
+  "question": "What is the paper about?",
+  "chat_history": []
+}
+```
+
+Response:
+
+```json
+{
+  "answer": "This paper discusses...",
+  "source_documents": [...]
+}
+```
+
+---
+
+## 🧼 .gitignore Highlights
+
+Make sure your `.gitignore` includes:
+
+```
+__pycache__/
+*.pyc
+.env
+backend/chroma/
+backend/temp_files/
+```
+
+---
+
+## 🧠 Credits
+
+Built with 💡 by [Dimple Khatri](https://github.com/dimplek0424)  
+Uses: Python, LangChain, ChromaDB, FastAPI, Vercel, Render
+
+---
+
+## 📎 License
+
+MIT License
