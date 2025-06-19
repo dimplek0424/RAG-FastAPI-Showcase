@@ -18,6 +18,8 @@ app = FastAPI()
 class QuestionInput(BaseModel):
     question: str
 
+FRONTEND_ORIGIN = os.getenv("FRONTEND_ORIGIN", "http://localhost:3000")
+
 # ✅ Health check endpoint (used by Render or other platforms)
 @app.get("/healthz")
 def health_check():
@@ -26,7 +28,7 @@ def health_check():
 # CORS middleware to allow frontend apps (e.g. React) to access the backend APIs
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # ⚠️ In production, restrict to frontend URL (e.g., http://localhost:3000)
+    allow_origins=[FRONTEND_ORIGIN],  # ✅ Replace this with your actual deployed frontend URL
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
