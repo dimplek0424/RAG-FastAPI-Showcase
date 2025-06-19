@@ -1,16 +1,20 @@
-from langchain.vectorstores import Chroma
+from langchain_community.vectorstores import Chroma
 from langchain_openai import OpenAIEmbeddings
 from fastapi import FastAPI, UploadFile, Form
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from fastapi import HTTPException
 import os
 import shutil
 import hashlib
 
 # Custom modules for PDF parsing and RAG pipeline
 from utils import load_and_split_pdf
-from rag_engine import get_vectorstore_from_chunks, create_rag_chain
+from rag_engine import create_rag_chain, get_vectorstore_from_chunks
+
+# Utility functions for maintenance tasks
+from maintenance import delete_all_vectorstores, delete_vectorstore_by_hash, delete_temp_files
 
 # Initialize the FastAPI app
 app = FastAPI()
@@ -67,6 +71,10 @@ async def upload_pdf(file: UploadFile):
     - Initializes a QA chain for RAG-style answering
     """
     try:
+        # ✅ Validate MIME type and file extension
+        if file.content_type != "application/pdf" or not file.filename.lower().endswith(".pdf"):
+            return JSONResponse(status_code=400, content={"error": "Only PDF files are allowed."})
+
         os.makedirs("temp_files", exist_ok=True)
 
         file_path = f"temp_files/{file.filename}"
@@ -111,7 +119,9 @@ async def upload_pdf(file: UploadFile):
         app.state.qa_chains[file_hash] = qa_chain
         app.state.active_chain_hash = file_hash  # Track current active chain
 
-        return {"message": "PDF uploaded and indexed successfully."}
+        return {"message": "PDF uploaded and indexed successfully.",
+                "file_hash": file_hash  # ✅ Add this line for easy testing
+                }
 
     except Exception as e:
         print(f"❌ Error during upload: {e}")
@@ -176,3 +186,54 @@ async def ask_question(data: QuestionInput):
             status_code=500,
             content={"error": str(e)}
         )
+
+# ---------------------------
+# 🔧 Utility: Delete all vectorstores
+# ---------------------------
+@app.delete("/cache/clear/")
+def clear_all_vectorstores():
+    """
+    Deletes the entire 'vector_cache' directory and all stored vectorstores.
+    Useful for resetting the system in development or managing disk space.
+    """
+    if delete_all_vectorstores():
+        return {"message": "All cached vectorstores deleted."}
+    else:
+        raise HTTPException(status_code=500, detail="Failed to delete cached vectorstores.")
+
+
+# ---------------------------
+# 🔧 Utility: Delete vectorstore for a specific PDF hash
+# ---------------------------
+@app.delete("/cache/{file_hash}")
+def clear_specific_vectorstore(file_hash: str):
+    """
+    Deletes a specific vectorstore by its file hash.
+    Helps clean up cached data for one specific document.
+    """
+    try:
+        if delete_vectorstore_by_hash(file_hash):
+            return {"message": f"✅ Vectorstore for hash {file_hash} deleted."}
+        return JSONResponse(status_code=404, content={"error": f"No vectorstore found for hash: {file_hash}"})
+    except Exception as e:
+        print(f"❌ Error in clear_specific_vectorstore: {e}")
+        raise HTTPException(status_code=500, detail="Failed to delete the specified vectorstore.")
+
+
+# ---------------------------
+# 🔧 Utility: Clear temp PDF uploads
+# ---------------------------
+@app.delete("/temp/clear/")
+def clear_temp_files():
+    """
+    Deletes all files inside the 'temp_files' directory.
+    Use this to clean up uploaded PDFs that are no longer needed.
+    """
+    if delete_temp_files():
+        return {"message": "✅ All temp files cleared."}
+    return JSONResponse(status_code=404, content={"error": "Temp files directory not found."})
+
+@app.get("/debug/vectorstore-path/{file_hash}")
+def check_vectorstore_path(file_hash: str):
+    path = os.path.join("vector_cache", f"{file_hash}_chroma")
+    return {"exists": os.path.exists(path), "path": path}

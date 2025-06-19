@@ -1,8 +1,18 @@
-from langchain.embeddings import OpenAIEmbeddings
-from langchain.vectorstores import Chroma
-from langchain.prompts import PromptTemplate
+# LangChain Community - RECOMMENDED
+from langchain_openai import OpenAIEmbeddings
+from langchain_community.vectorstores import Chroma
+from langchain_community.chat_models import ChatOpenAI
+
+# LangChain Core and Chains
+from langchain_core.prompts import PromptTemplate
+#from langchain_core.chains.retrieval_qa import RetrievalQA
+
+import sys
+print(sys.path)
+# Then your imports
 from langchain.chains import RetrievalQA
-from langchain.chat_models import ChatOpenAI
+
+# Core imports
 import os
 from dotenv import load_dotenv
 
@@ -60,17 +70,22 @@ def create_rag_chain(vectorstore):
         retriever = vectorstore.as_retriever(search_kwargs={"k": 20})
 
         # ✅ GPT-4 with low temperature for deterministic responses
-        llm = ChatOpenAI(temperature=0, model_name="gpt-4")
+        llm = ChatOpenAI(temperature=0.3, model_name="gpt-4", openai_api_key=os.getenv("OPENAI_API_KEY"))
 
         # ✅ Prompt template for list-style, contextual answers
         prompt_template = PromptTemplate(
             input_variables=["context", "question"],
             template="""
-You are a helpful assistant. Use ONLY the context below to answer the question.
+You are a helpful and concise assistant. Use ONLY the context below to answer the question.
 
-If the question asks to list strategies, tips, or points, include **all complete items** found in the context and number them clearly.
+If the question asks for strategies, tips, or steps:
+- Extract and list all specific strategies mentioned.
+- If the user asks for a subset (e.g., top 3), pick the most actionable or impactful ones based on the context.
+- Number the items clearly and quote phrases or sentences if helpful.
 
-Do NOT answer if the context does not provide full details.
+If the question is vague, do your best to summarize relevant insights from the document.
+
+Only use information from the context. Do not invent or assume.
 
 Context:
 {context}

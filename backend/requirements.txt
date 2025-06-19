@@ -2,15 +2,20 @@
 fastapi==0.111.0
 uvicorn==0.29.0
 
-# LangChain & LLMs
-langchain==0.1.13
-langchain-community
-openai==1.59.7
-tiktoken==0.7.0
-langchain-openai
+# LangChain Ecosystem (all compatible with each other and Pydantic v2)
+langchain-core==0.2.22 # Or a newer 0.2.x version, matching langchain-community/openai
+langchain-community==0.2.9 # Updated to match newer core
+langchain-openai==0.1.13 # Updated to match newer core/community
+langchain-text-splitters==0.2.1 # Add this and explicitly specify a 0.2.x version to keep it aligned
+langsmith==0.1.147 # Update langsmith as it also causes conflicts. This version is compatible with 0.2.x LangChain.
+
+# OpenAI & Tokenizer
+openai>=1.35.0,<2.0.0
+tiktoken>=0.7.0
+tqdm==4.66.2
 
 # PDF Support
-pypdf==4.3.1
+pypdf==4.2.0
 
 # Vector Store
 chromadb==0.4.24
@@ -19,5 +24,9 @@ chromadb==0.4.24
 python-dotenv==1.0.1
 python-multipart==0.0.9
 
-# For safety and logging (optional but helpful)
+# Optional (HTTP Requests)
 httpx==0.27.0
+
+# Pydantic & Settings (for LangChain v0.1.x)
+pydantic==2.7.4
+pydantic-settings==2.2.1
