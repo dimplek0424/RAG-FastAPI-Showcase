@@ -118,30 +118,48 @@ async def upload_pdf(file: UploadFile):
 # Route: Ask a question against uploaded PDF
 @app.post("/ask/")
 async def ask_question(data: QuestionInput):
-    print("Received question:", data.question)
     """
-    Endpoint to ask a natural language question.
-    Returns an answer based on the uploaded PDF (RAG-based),
-    along with the top source chunks used to generate it.
+    Handles a user question by:
+    - Reconstructing the vectorstore from the cached directory
+    - Rebuilding the RAG QA chain
+    - Passing the user's question to the chain
+    - Returning the AI-generated answer and top source chunks
+
+    This approach ensures the app works even if memory-based state (app.state.qa_chains) is lost due to Render restarts.
     """
     try:
-        if not hasattr(app.state, "qa_chains") or not getattr(app.state, "active_chain_hash", None):
+        # ✅ Step 1: Retrieve the current document hash from state (used during upload)
+        file_hash = getattr(app.state, "active_chain_hash", None)
+        if not file_hash:
             return JSONResponse(
                 status_code=400,
                 content={"error": "No document uploaded yet. Please upload a PDF first."}
             )
 
+        # ✅ Step 2: Construct the path to the cached vectorstore for this PDF
+        vectorstore_path = os.path.join("vector_cache", f"{file_hash}_chroma")
+
+        # ✅ Step 3: Reinitialize the embedding model with the OpenAI API key
+        embedding = OpenAIEmbeddings(openai_api_key=os.getenv("OPENAI_API_KEY"))
+
+        # ✅ Step 4: Reload the vectorstore from disk using the persisted embeddings
+        vectorstore = Chroma(
+            persist_directory=vectorstore_path,
+            embedding_function=embedding
+        )
+
+        # ✅ Step 5: Rebuild the RAG chain from the loaded vectorstore
+        qa_chain = create_rag_chain(vectorstore)
+
         print(f"🧠 Question received: {data.question}")
 
-        # Run the RAG chain
-        qa_chain = app.state.qa_chains[app.state.active_chain_hash]
+        # ✅ Step 6: Pass the question to the QA chain and generate an answer
         result = qa_chain.invoke({"query": data.question})
-        print("✅ Answer generated")
 
-        # Extract the top source chunks (optional but helpful for debugging)
-        answer = result['result']
+        # ✅ Step 7: Extract answer and source previews
+        answer = result["result"]
         sources = [
-            {"chunk": i + 1, "preview": doc.page_content[:300]}
+            {"chunk": i + 1, "preview": doc.page_content[:300]}  # Limit to first 300 characters for UI
             for i, doc in enumerate(result.get("source_documents", []))
         ]
 
@@ -152,4 +170,7 @@ async def ask_question(data: QuestionInput):
 
     except Exception as e:
         print(f"❌ Error during QA: {e}")
-        return JSONResponse(status_code=500, content={"error": str(e)})
+        return JSONResponse(
+            status_code=500,
+            content={"error": str(e)}
+        )
