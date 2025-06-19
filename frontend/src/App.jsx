@@ -64,7 +64,7 @@ function App() {
     try {
       const response = await axios.post(
         `${BACKEND_URL}/ask/`,
-         new URLSearchParams({ question }),
+         { question }, // JSON body,
          { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
       );
 
