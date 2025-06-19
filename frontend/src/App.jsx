@@ -64,8 +64,8 @@ function App() {
     try {
       const response = await axios.post(
         `${BACKEND_URL}/ask/`,
-         { question }, // JSON body,
-         { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
+        { question: question }, // send JSON body
+        { headers: { "Content-Type": "application/json" } }
       );
 
       const answer = response.data.answer.replace(/\n/g, "<br/>");

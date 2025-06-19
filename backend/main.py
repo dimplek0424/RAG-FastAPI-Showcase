@@ -3,6 +3,7 @@ from langchain_openai import OpenAIEmbeddings
 from fastapi import FastAPI, UploadFile, Form
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 import os
 import shutil
 import hashlib
@@ -13,6 +14,9 @@ from rag_engine import get_vectorstore_from_chunks, create_rag_chain
 
 # Initialize the FastAPI app
 app = FastAPI()
+
+class QuestionInput(BaseModel):
+    question: str
 
 # ✅ Health check endpoint (used by Render or other platforms)
 @app.get("/healthz")
@@ -113,7 +117,7 @@ async def upload_pdf(file: UploadFile):
 
 # Route: Ask a question against uploaded PDF
 @app.post("/ask/")
-async def ask_question(question: str = Form(...)):
+async def ask_question(data: QuestionInput):
     """
     Endpoint to ask a natural language question.
     Returns an answer based on the uploaded PDF (RAG-based),
@@ -126,11 +130,11 @@ async def ask_question(question: str = Form(...)):
                 content={"error": "No document uploaded yet. Please upload a PDF first."}
             )
 
-        print(f"🧠 Question received: {question}")
+        print(f"🧠 Question received: {data.question}")
 
         # Run the RAG chain
         qa_chain = app.state.qa_chains[app.state.active_chain_hash]
-        result = qa_chain.invoke({"query": question})
+        result = qa_chain.invoke({"query": data.question})
         print("✅ Answer generated")
 
         # Extract the top source chunks (optional but helpful for debugging)
