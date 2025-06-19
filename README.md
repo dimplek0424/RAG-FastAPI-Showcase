@@ -1,6 +1,6 @@
 # 📚 RAG_FASTAPI – Retrieval-Augmented Generation Chat Assistant
 
-A lightweight Retrieval-Augmented Generation (RAG) web application using **FastAPI**, **LangChain**, **ChromaDB**, and **OpenAI GPT-4** for intelligent question-answering on uploaded PDF documents.
+A lightweight Retrieval-Augmented Generation (RAG) web application using **Python**, **FastAPI**, **LangChain**, **ChromaDB**, and **OpenAI GPT-4** for intelligent question-answering on uploaded PDF documents.
 
 ## 🧱 Tech Stack
 
