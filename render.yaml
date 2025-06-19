@@ -1,12 +1,15 @@
 services:
   - type: web
     name: rag-fastapi-backend
-    env: python
-    region: oregon
+    env: docker
     plan: free
-    buildCommand: "pip install -r requirements.txt"
-    startCommand: "uvicorn main:app --host 0.0.0.0 --port 10000"
+    region: virginia
+    dockerfilePath: ./Dockerfile
+    buildFilter:
+      paths:
+        - backend/**
+        - Dockerfile
     envVars:
       - key: OPENAI_API_KEY
-        sync: false
-    rootDir: backend
+        sync: false  # set this in the Render dashboard
+    autoDeploy: true
