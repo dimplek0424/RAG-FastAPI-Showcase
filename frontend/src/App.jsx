@@ -44,7 +44,7 @@ function App() {
 
     try {
       setIsUploading(true);
-      await axios.post("${BACKEND_URL}/upload/", formData, {
+      await axios.post('${BACKEND_URL}/upload/', formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       setUploadSuccess(true);
@@ -63,7 +63,7 @@ function App() {
 
     try {
       const response = await axios.post(
-        "${BACKEND_URL}/ask/",
+        '${BACKEND_URL}/ask/',
         new URLSearchParams({ question }),
         { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
       );
