@@ -8,14 +8,12 @@ from langchain.embeddings import OpenAIEmbeddings
 from langchain_community.vectorstores.chroma import Chroma as CommunityChroma
 
 # ---------------------------
-# 🧹 Deletes all vectorstore directories inside 'vector_cache'
+# 🧹 Deletes all vectorstore directories inside the specified base directory (vector cache)
 # ---------------------------
 # ✅ Deletes the entire vector_cache directory safely, even if files are locked or write-protected
-def delete_all_vectorstores():
-    vectorstore_dir = "vector_cache"
-
-    # Check if the directory exists
-    if os.path.exists(vectorstore_dir):
+def delete_all_vectorstores(vectorstore_base_dir: str): # Added parameter
+    # Use the passed base directory
+    if os.path.exists(vectorstore_base_dir):
 
         # Custom error handler for locked or write-protected files
         def onerror(func, path, exc_info):
@@ -29,29 +27,31 @@ def delete_all_vectorstores():
 
         try:
             # Use shutil.rmtree with onerror to avoid PermissionError
-            shutil.rmtree(vectorstore_dir, onerror=onerror)
-            print("✅ All vectorstores deleted.")
+            shutil.rmtree(vectorstore_base_dir, onerror=onerror)
+            print(f"✅ All vectorstores in {vectorstore_base_dir} deleted.")
             return True
         except Exception as e:
-            # Catch any unexpected errors and log
-            print(f"❌ Failed to delete vectorstores: {e}")
+            print(f"❌ Failed to delete vectorstores in {vectorstore_base_dir}: {e}")
             return False
     else:
-        print("ℹ️ No vectorstores to delete.")
+        print(f"ℹ️ No vectorstores to delete at {vectorstore_base_dir}.")
         return False
 
 
 # ---------------------------
 # 🧹 Deletes a specific vectorstore folder by file hash (with Chroma reset)
 # ---------------------------
-def delete_vectorstore_by_hash(file_hash: str):
+def delete_vectorstore_by_hash(file_hash: str, vectorstore_base_dir: str): # Added parameter
     """
     Properly deletes a specific Chroma vectorstore by:
     1. Loading the store.
     2. Closing the connection (if necessary).
     3. Deleting the directory.
     """
-    path = os.path.join("vector_cache", f"{file_hash}_chroma")
+    # --- CRITICAL FIX HERE ---
+    # This line needs to use vectorstore_base_dir, not hardcoded "vector_cache"
+    path = os.path.join(vectorstore_base_dir, f"{file_hash}_chroma")
+    # --- END CRITICAL FIX ---
     print(f"🧹 Attempting to delete vectorstore at: {path}")
 
     try:

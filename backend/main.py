@@ -14,6 +14,7 @@ from utils import load_and_split_pdf
 from rag_engine import create_rag_chain, get_vectorstore_from_chunks
 
 # Utility functions for maintenance tasks
+# IMPORTANT: These functions will now receive the base directory as an argument
 from maintenance import delete_all_vectorstores, delete_vectorstore_by_hash, delete_temp_files
 
 # Initialize the FastAPI app
@@ -28,6 +29,10 @@ FRONTEND_ORIGIN = os.getenv("FRONTEND_ORIGIN", "http://localhost:3000")
 """@app.get("/healthz")
 def health_check():
     return {"status": "ok"}"""
+
+# Define the base directory for ChromaDB persistence using an environment variable.
+# It defaults to 'vector_cache_local' for local development if CHROMA_PERSIST_DIR is not set.
+CHROMA_PERSIST_BASE_DIR = os.getenv("CHROMA_PERSIST_DIR", "vector_cache_local")
 
 # CORS middleware to allow frontend apps (e.g. React) to access the backend APIs
 app.add_middleware(
@@ -90,10 +95,15 @@ async def upload_pdf(file: UploadFile):
         if not chunks:
             return JSONResponse(status_code=400, content={"error": "PDF could not be processed or was empty."})
 
+         # --- IMPORTANT CHANGE START ---
+        # Ensure the base persistent directory exists
+        os.makedirs(CHROMA_PERSIST_BASE_DIR, exist_ok=True)
+
         # Step 2: Generate hash to identify this file for caching
         file_hash = generate_file_hash(file_path)
-        vectorstore_path = os.path.join("vector_cache", f"{file_hash}_chroma")
-        os.makedirs("vector_cache", exist_ok=True)
+        # Use the persistent base directory for vectorstore_path
+        vectorstore_path = os.path.join(CHROMA_PERSIST_BASE_DIR, f"{file_hash}_chroma")
+        # --- IMPORTANT CHANGE END ---
 
         embedding = OpenAIEmbeddings(openai_api_key=os.getenv("OPENAI_API_KEY"))
 
@@ -148,8 +158,11 @@ async def ask_question(data: QuestionInput):
                 content={"error": "No document uploaded yet. Please upload a PDF first."}
             )
 
-        # ✅ Step 2: Construct the path to the cached vectorstore for this PDF
-        vectorstore_path = os.path.join("vector_cache", f"{file_hash}_chroma")
+        # --- IMPORTANT CHANGE START ---
+        # Step 2: Construct the path to the cached vectorstore for this PDF
+        # Use the persistent base directory for vectorstore_path
+        vectorstore_path = os.path.join(CHROMA_PERSIST_BASE_DIR, f"{file_hash}_chroma")
+        # --- IMPORTANT CHANGE END ---
 
         # ✅ Step 3: Reinitialize the embedding model with the OpenAI API key
         embedding = OpenAIEmbeddings(openai_api_key=os.getenv("OPENAI_API_KEY"))
@@ -196,7 +209,8 @@ def clear_all_vectorstores():
     Deletes the entire 'vector_cache' directory and all stored vectorstores.
     Useful for resetting the system in development or managing disk space.
     """
-    if delete_all_vectorstores():
+    # Pass the CHROMA_PERSIST_BASE_DIR to the maintenance function
+    if delete_all_vectorstores(CHROMA_PERSIST_BASE_DIR):
         return {"message": "All cached vectorstores deleted."}
     else:
         raise HTTPException(status_code=500, detail="Failed to delete cached vectorstores.")
@@ -212,7 +226,8 @@ def clear_specific_vectorstore(file_hash: str):
     Helps clean up cached data for one specific document.
     """
     try:
-        if delete_vectorstore_by_hash(file_hash):
+         # Pass the CHROMA_PERSIST_BASE_DIR to the maintenance function
+        if delete_vectorstore_by_hash(file_hash, CHROMA_PERSIST_BASE_DIR):
             return {"message": f"✅ Vectorstore for hash {file_hash} deleted."}
         return JSONResponse(status_code=404, content={"error": f"No vectorstore found for hash: {file_hash}"})
     except Exception as e:
@@ -229,11 +244,12 @@ def clear_temp_files():
     Deletes all files inside the 'temp_files' directory.
     Use this to clean up uploaded PDFs that are no longer needed.
     """
+     # Call the delete_temp_files function from maintenance.py
+    # This function returns True on success, False otherwise
     if delete_temp_files():
-        return {"message": "✅ All temp files cleared."}
-    return JSONResponse(status_code=404, content={"error": "Temp files directory not found."})
-
-@app.get("/debug/vectorstore-path/{file_hash}")
-def check_vectorstore_path(file_hash: str):
-    path = os.path.join("vector_cache", f"{file_hash}_chroma")
-    return {"exists": os.path.exists(path), "path": path}
+        # If the deletion was successful, return a success message
+        return {"message": "✅ All temporary files cleared."}
+    else:
+        # If the temporary files directory was not found, return a 404 error
+        # with an appropriate message
+        return JSONResponse(status_code=404, content={"error": "Temporary files directory not found."})
