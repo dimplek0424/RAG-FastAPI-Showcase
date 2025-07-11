@@ -5,7 +5,7 @@ FROM python:3.10-slim
 WORKDIR /app
 
 # Copy backend folder contents
-COPY ./backend /app
+COPY /backend .
 
 # Install system dependencies (optional, based on your packages)
 RUN apt-get update && apt-get install -y build-essential cargo && \
