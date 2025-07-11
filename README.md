@@ -2,6 +2,11 @@
 
 A lightweight Retrieval-Augmented Generation (RAG) web application using **Python**, **FastAPI**, **LangChain**, **ChromaDB**, and **OpenAI GPT-4** for intelligent question-answering on uploaded PDF documents.
 
+## 🔗 Try it live: [https://rag-fastapi.vercel.app](https://rag-fastapi.vercel.app)
+> ✨ New: Frontend session persistence and PDF-specific chat memory now live!
+
+---
+
 ## 🧱 Tech Stack
 
 - **Backend**: FastAPI · LangChain · OpenAI · ChromaDB
@@ -16,12 +21,13 @@ A lightweight Retrieval-Augmented Generation (RAG) web application using **Pytho
 
 ## 🚀 Features
 
-- Upload PDF documents
-- Extract and embed content using OpenAI Embeddings
-- Store and retrieve vectors using ChromaDB
-- Ask questions in a chat UI and get grounded responses via GPT
-- Session-based chat persistence
-- Live deployed frontend + backend integration
+- ✅ Upload PDF documents
+- ✅ Extract and embed content using OpenAI Embeddings
+- ✅ Store and retrieve vectors using ChromaDB
+- ✅ Ask questions in a modern, chat-style interface
+- ✅ PDF-specific chat memory per file hash
+- ✅ Session persistence via browser sessionStorage
+- ✅ Fully integrated, cloud-deployed RAG pipeline
 
 ---
 
@@ -34,7 +40,6 @@ RAG_FASTAPI/
 │   ├── utils/
 │   ├── temp_files/
 │   ├── chroma/
-│   ├── Dockerfile
 │   ├── requirements.txt
 │   └── runtime.txt
 ├── frontend/
@@ -43,34 +48,25 @@ RAG_FASTAPI/
 │   ├── vite.config.js
 │   └── ...
 ├── .gitignore
+├── Dockerfile
 └── README.md
 ```
 
 ---
 
-## ⚙️ Backend Setup (Render + Docker)
+## ⚙️ Backend Setup (Railway + Docker)
 
 ### 🔧 Local Development
-
-1. **Install dependencies:**
 
 ```bash
 cd backend
 pip install -r requirements.txt
-```
-
-2. **Run the app:**
-
-```bash
 uvicorn main:app --reload
 ```
 
----
+### 🚢 Deployment on Railway (Docker)
 
-### 🚢 Deployment on Render (Docker)
-
-1. **Dockerfile**
-
+**Dockerfile (backend/Dockerfile):**
 ```dockerfile
 FROM python:3.10-slim
 WORKDIR /app
@@ -82,25 +78,20 @@ EXPOSE 10000
 CMD ["uvicorn", "main:app", "--host=0.0.0.0", "--port=10000"]
 ```
 
-2. **runtime.txt** (in `backend/`):
-
+**runtime.txt**:
 ```
 python-3.10.13
 ```
 
-3. **Render Settings**:
-   - Name: `rag-fastapi-backend`
-   - Branch: `main`
-   - Root Directory: /backend
-   - Docker Build Context: `.`  
-   - Dockerfile Path: `./Dockerfile`
-   - Instance: Free or Starter
-   - Environment Variable:
-     ```
-     OPENAI_API_KEY=your-key-here
-     ```
+**Railway Project Settings:**
+```
+Root Directory: /backend
+Dockerfile Path: ./Dockerfile
+Environment Variable:
+OPENAI_API_KEY=your-openai-key
+```
 
-4. **Railway URL (example)**:
+**Example Backend URL**:
 ```
 https://ragfastapi-production.up.railway.app
 ```
@@ -111,50 +102,38 @@ https://ragfastapi-production.up.railway.app
 
 ### 🛠 Local Development
 
-1. Install dependencies:
-
 ```bash
 cd frontend
 npm install
-```
-
-2. Run the frontend:
-
-```bash
 npm run dev
 ```
 
-Make sure `.env` contains:
+`.env` file:
 ```
 VITE_BACKEND_URL=http://localhost:8000
 ```
 
----
-
 ### 🚀 Deploy on Vercel
 
-1. Push your repo to GitHub.
-2. Go to [vercel.com](https://vercel.com) → New Project → Import your repo.
-3. Set Environment Variable:
-
+1. Push repo to GitHub
+2. Visit [vercel.com](https://vercel.com) → New Project → Import repo
+3. Set **Environment Variable**:
 ```
 VITE_BACKEND_URL=https://ragfastapi-production.up.railway.app
 ```
-
-4. Click **Deploy**. Done!
+4. Deploy 🎉
 
 ---
 
 ## 🔄 Connecting Frontend to Backend
 
-In your React code:
-
+In `App.jsx`:
 ```js
-const BASE_URL = import.meta.env.VITE_BACKEND_URL;
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
-const response = await fetch(`${BASE_URL}/ask`, {
-  method: "POST",
-  body: JSON.stringify({ question: "..." }),
+await axios.post(`${BACKEND_URL}/ask/`, {
+  question: "...",
+  file_hash: currentHash,
 });
 ```
 
@@ -163,16 +142,13 @@ const response = await fetch(`${BASE_URL}/ask`, {
 ## 🧪 Example API Call
 
 **POST** `/ask`
-
 ```json
 {
   "question": "What is the paper about?",
-  "chat_history": []
+  "file_hash": "abc123..."
 }
 ```
-
 Response:
-
 ```json
 {
   "answer": "This paper discusses...",
@@ -184,9 +160,7 @@ Response:
 
 ## 🧼 .gitignore Highlights
 
-Make sure your `.gitignore` includes:
-
-```
+```bash
 __pycache__/
 *.pyc
 .env
@@ -199,10 +173,11 @@ backend/temp_files/
 ## 🧠 Credits
 
 Built with 💡 by [Dimple Khatri](https://github.com/dimplek0424)  
-Uses: Python, LangChain, ChromaDB, FastAPI, Vercel, Railway
+Uses: Python · LangChain · ChromaDB · FastAPI · Vercel · Railway
 
 ---
 
 ## 📎 License
 
 MIT License
+
