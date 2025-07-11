@@ -8,7 +8,7 @@ A lightweight Retrieval-Augmented Generation (RAG) web application using **Pytho
 - **Frontend**: Vite + React
 - **Vector Store**: Chroma
 - **Deployment**:
-  - Backend: Render (Docker)
+  - Backend: Railway (Docker)
   - Frontend: Vercel (Vite React)
 - **Language Support**: Python 3.10
 
@@ -91,7 +91,7 @@ python-3.10.13
 3. **Render Settings**:
    - Name: `rag-fastapi-backend`
    - Branch: `main`
-   - Root Directory: *(leave blank for Docker)*
+   - Root Directory: /backend
    - Docker Build Context: `.`  
    - Dockerfile Path: `./Dockerfile`
    - Instance: Free or Starter
@@ -100,9 +100,9 @@ python-3.10.13
      OPENAI_API_KEY=your-key-here
      ```
 
-4. **Render URL (example)**:
+4. **Railway URL (example)**:
 ```
-https://rag-fastapi-backend.onrender.com
+https://ragfastapi-production.up.railway.app
 ```
 
 ---
@@ -138,7 +138,7 @@ VITE_BACKEND_URL=http://localhost:8000
 3. Set Environment Variable:
 
 ```
-VITE_BACKEND_URL=https://rag-fastapi-backend.onrender.com
+VITE_BACKEND_URL=https://ragfastapi-production.up.railway.app
 ```
 
 4. Click **Deploy**. Done!
@@ -199,7 +199,7 @@ backend/temp_files/
 ## 🧠 Credits
 
 Built with 💡 by [Dimple Khatri](https://github.com/dimplek0424)  
-Uses: Python, LangChain, ChromaDB, FastAPI, Vercel, Render
+Uses: Python, LangChain, ChromaDB, FastAPI, Vercel, Railway
 
 ---
 

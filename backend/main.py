@@ -25,9 +25,9 @@ class QuestionInput(BaseModel):
 FRONTEND_ORIGIN = os.getenv("FRONTEND_ORIGIN", "http://localhost:3000")
 
 # ✅ Health check endpoint (used by Render or other platforms)
-@app.get("/healthz")
+"""@app.get("/healthz")
 def health_check():
-    return {"status": "ok"}
+    return {"status": "ok"}"""
 
 # CORS middleware to allow frontend apps (e.g. React) to access the backend APIs
 app.add_middleware(
