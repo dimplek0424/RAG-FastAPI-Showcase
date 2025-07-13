@@ -7,6 +7,21 @@ A lightweight Retrieval-Augmented Generation (RAG) web application using **Pytho
 
 ---
 
+## 🌟 What's New
+
+- 🎨 **Modern Chat UI**: Messages are visually separated with better spacing, alignment, and color contrast.
+- 📄 **PDF Name Displayed**: Active document title shown above the chat.
+- 💾 **Session Persistence**: Chat is retained per file hash in sessionStorage.
+- ⚠️ **PDF Upload Guardrails**: Prevents re-upload unless cleared.
+- ⏳ **Loading Indicators**: "Thinking..." shown while LLM processes response.
+- ✅ **Mobile-Responsive Layout**: Fully center-aligned and responsive.
+- 🖼️ **Screenshots**:
+  | Upload & Chat Start | Interactive Q&A | Contextual Follow-ups |
+  |---------------------|-----------------|------------------------|
+  | ![demo1](assets/RAG%20demo%201.png) | ![demo2](assets/RAG%20demo%202.png) | ![demo3](assets/RAG%20demo%203.png) |
+
+---
+
 ## 🧱 Tech Stack
 
 - **Backend**: FastAPI · LangChain · OpenAI · ChromaDB
