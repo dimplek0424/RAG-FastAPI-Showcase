@@ -2,7 +2,7 @@
 
 A lightweight Retrieval-Augmented Generation (RAG) web application using **Python**, **FastAPI**, **LangChain**, **ChromaDB**, and **OpenAI GPT-4** for intelligent question-answering on uploaded PDF documents.
 
-## 🔗 Try it live: [https://rag-fastapi.vercel.app](https://rag-fastapi.vercel.app)
+## 🔗 Try it live: [https://rag-fastapi.vercel.app](https://rag-fastapi.vercel.app) {inactive since Aug 2025, look at the screenshots}
 > ✨ New: Frontend session persistence and PDF-specific chat memory now live!
 
 ---
